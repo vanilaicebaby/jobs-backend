@@ -10,6 +10,7 @@ dotenv.config();
 
 // Importy routes
 const jobRoutes = require('./src/routes/jobRoutes');
+const rootRoutes = require('./src/routes/rootRoutes');
 
 // Vytvoření Express aplikace
 const app = express();
@@ -26,13 +27,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Připojení k MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-  // Odstraněno nastavení authMechanism, protože pravděpodobně není vyžadováno pro standardní připojení
-})
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log('Úspěšně připojeno k MongoDB'))
 .catch((error) => console.error('Chyba při připojování k MongoDB:', error));
 
 // Definice routes
+app.use('/', rootRoutes);
 app.use('/api/jobs', jobRoutes);
 
 // Hlavní error handler
@@ -41,6 +41,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     message: 'Něco se pokazilo',
     error: process.env.NODE_ENV === 'development' ? err.message : {}
+  });
+});
+
+// Catch-all route handler pro neexistující routes
+app.use((req, res) => {
+  res.status(404).json({
+    message: 'Požadovaná cesta nebyla nalezena',
+    path: req.path
   });
 });
 
