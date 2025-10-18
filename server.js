@@ -1,18 +1,21 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors');
-const bodyParser = require('body-parser');
+const dotenv = require('dotenv');
 const serverless = require('serverless-http');
 
-// Import your routes
-const jobRoutes = require('./routes/jobs');
-const userRoutes = require('./routes/users');
+// Načtení konfigurace prostředí
+dotenv.config();
 
+// Importy routes
+const jobRoutes = require('./src/routes/jobRoutes');
+
+// Vytvoření Express aplikace
 const app = express();
 
-// CORS Configuration
+// CORS konfigurace
 const corsOptions = {
   origin: function (origin, callback) {
-    // Lista povolených domén
     const whitelist = [
       'https://workuj.cz', 
       'http://workuj.cz', 
@@ -20,7 +23,6 @@ const corsOptions = {
       'https://localhost:3000'
     ];
 
-    // Povolit požadavky bez origin (např. mobilní aplikace)
     if (!origin || whitelist.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -31,53 +33,42 @@ const corsOptions = {
   allowedHeaders: [
     'Content-Type', 
     'Authorization', 
-    'X-Requested-With',
-    'X-HTTP-Method-Override',
-    'Accept'
+    'X-Requested-With'
   ],
-  credentials: true,
-  maxAge: 86400 // 24 hodin cache preflight requestů
+  credentials: true
 };
 
 // Middleware
 app.use(cors(corsOptions));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Přidání CORS hlaviček ručně pro jistotu
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  
-  // Respond to preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  
-  next();
-});
-
-// Parser pro JSON a URL-encoded data
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// Logging middleware (volitelné)
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-  next();
-});
+// Připojení k MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('Připojeno k MongoDB'))
+.catch((error) => console.error('Chyba připojení k MongoDB:', error));
 
 // Routes
 app.use('/api/jobs', jobRoutes);
-app.use('/api/users', userRoutes);
 
-// Global error handler
+// Root route
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Workuj.cz Backend API',
+    status: 'OK'
+  });
+});
+
+// Globální error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
     status: 'error',
     message: process.env.NODE_ENV === 'production' 
-      ? 'An unexpected error occurred' 
+      ? 'Něco se pokazilo' 
       : err.message
   });
 });
@@ -86,7 +77,7 @@ app.use((err, req, res, next) => {
 app.use((req, res, next) => {
   res.status(404).json({
     status: 'error',
-    message: 'Endpoint not found'
+    message: 'Endpoint nenalezen'
   });
 });
 
