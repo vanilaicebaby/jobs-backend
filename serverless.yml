@@ -21,10 +21,3 @@ functions:
 
 plugins:
   - serverless-offline
-  - serverless-domain-manager
-
-custom:
-  customDomain:
-    domainName: api.workuj.cz
-    certificateArn: arn:aws:acm:us-east-1:615299768293:certificate/f0b93040-b436-4f4a-90a9-12ee9e9d2e4b
-    region: us-east-1  # Ujisti se, že region souhlasí
