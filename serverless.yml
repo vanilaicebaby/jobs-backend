@@ -1,18 +1,37 @@
+frameworkVersion: '3'
+
+service: workuj-backend
+
 provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'prod'}
+  region: eu-central-1
   apiGateway:
-    cors: true  # Základní povolení CORS
+    cors:
+      origin: '*'  # Pro produkci omezit na konkrétní domény
+      headers:
+        - Content-Type
+        - X-Amz-Date
+        - Authorization
+        - X-Api-Key
+        - X-Amz-Security-Token
+      allowCredentials: false
 
 functions:
   app:
+    handler: lambda.handler
     events:
       - http:
           path: /
           method: ANY
-          cors: true  # CORS pro každou cestu
+          cors: true  # Povolení CORS pro každou cestu
+
       - http:
           path: /{proxy+}
           method: ANY
-          cors: true
+          cors: true  # Povolení CORS pro každou cestu
+
 
 plugins:
   - serverless-offline
