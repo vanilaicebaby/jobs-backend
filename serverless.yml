@@ -11,7 +11,7 @@ functions:
     handler: lambda.handler
     events:
       - http:
-          path: api/jobs  # Odstraňte duplicitní /prod
+          path: api/jobs
           method: get
           cors: true
       - http:
@@ -26,6 +26,6 @@ plugins:
 custom:
   customDomain:
     domainName: api.workuj.cz
-    stage: ${self:provider.stage}
-    basePath: prod  # Toto nastaví basePath na 'prod'
+    basePath: ''  # Prázdný basePath
+    stage: prod
     createRoute53Record: true
