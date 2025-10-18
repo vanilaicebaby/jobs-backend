@@ -1,0 +1,8 @@
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'prod'}
+  region: eu-central-1
+  # Odstraňte ruční nastavení MONGODB_URI
+  # environment:
+  #   MONGODB_URI: ${env:MONGODB_URI}  <- TOHLE SMAŽTE

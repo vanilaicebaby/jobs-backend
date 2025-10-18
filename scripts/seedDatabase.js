@@ -2,10 +2,8 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const Job = require('../src/models/Job');
 
-// Načtení proměnných prostředí
 dotenv.config();
 
-// Mock data pro pracovní nabídky
 const jobsData = [
   {
     title: 'Senior Frontend Developer',
@@ -14,11 +12,7 @@ const jobsData = [
     salary: '80 000 - 120 000 CZK',
     tags: ['React', 'TypeScript', 'Frontend'],
     industry: 'IT',
-    description: 'Hledáme zkušeného Frontend vývojáře pro náš dynamický tým.',
-    featured: true,
-    matched: true,
-    hotness: 95,
-    companyRating: 4.8
+    description: 'Hledáme zkušeného Frontend vývojáře pro náš dynamický tým.'
   },
   {
     title: 'Finanční Analytik',
@@ -27,32 +21,16 @@ const jobsData = [
     salary: '70 000 - 100 000 CZK',
     tags: ['Finance', 'Excel', 'Analýza'],
     industry: 'Finance',
-    description: 'Připojte se k našemu finančnímu týmu a podílejte se na strategických rozhodnutích.',
-    featured: false,
-    matched: false,
-    hotness: 75,
-    companyRating: 4.5
+    description: 'Připojte se k našemu finančnímu týmu a podílejte se na strategických rozhodnutích.'
   }
 ];
 
-// Funkce pro seed databáze
 async function seedDatabase() {
   try {
-    // Připojení k MongoDB
-    await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-
-    // Smazání stávajících záznamů
+    await mongoose.connect(process.env.MONGODB_URI);
     await Job.deleteMany({});
-
-    // Vložení mock dat
     await Job.insertMany(jobsData);
-
     console.log('Databáze úspěšně naplněna');
-    
-    // Uzavření spojení
     await mongoose.connection.close();
   } catch (error) {
     console.error('Chyba při naplňování databáze:', error);
@@ -60,5 +38,4 @@ async function seedDatabase() {
   }
 }
 
-// Spuštění seed skriptu
 seedDatabase();

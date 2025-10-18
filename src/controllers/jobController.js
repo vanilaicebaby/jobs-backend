@@ -3,7 +3,6 @@ const Job = require('../models/Job');
 // Získání všech pracovních nabídek
 exports.getAllJobs = async (req, res) => {
   try {
-    // Destructure query parametrů
     const { 
       page = 1, 
       limit = 10, 
@@ -11,10 +10,8 @@ exports.getAllJobs = async (req, res) => {
       industry 
     } = req.query;
 
-    // Základní vyhledávací kritéria
     const query = {};
 
-    // Pokud je zadán searchterm, hledej v názvu, společnosti a tazích
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
@@ -23,21 +20,17 @@ exports.getAllJobs = async (req, res) => {
       ];
     }
 
-    // Filtrování podle průmyslu
     if (industry) {
       query.industry = industry;
     }
 
-    // Provedení dotazu s paginací
     const jobs = await Job.find(query)
       .limit(Number(limit))
       .skip((Number(page) - 1) * Number(limit))
       .sort({ postedDate: -1 });
 
-    // Celkový počet výsledků
     const total = await Job.countDocuments(query);
 
-    // Odpověď
     res.json({
       jobs,
       totalPages: Math.ceil(total / limit),
