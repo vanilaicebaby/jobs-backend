@@ -7,29 +7,44 @@ provider:
   runtime: nodejs18.x
   stage: ${opt:stage, 'prod'}
   region: eu-central-1
-  httpApi:
-    cors: 
-      allowedOrigins:
-        - https://workuj.cz
-      allowedHeaders:
-        - Content-Type
-        - X-Amz-Date
-        - Authorization
-        - X-Api-Key
-        - X-Amz-Security-Token
-      allowCredentials: false
+  
+  # DŮLEŽITÉ: přidejte tuto sekci pro manuální CORS nastavení
+  apiGateway:
+    minimumCompressionSize: 1024
+    shouldStartNameWithService: true
+  
+  environment:
+    CORS_ORIGIN: https://workuj.cz
 
 functions:
   app:
     handler: lambda.handler
     events:
-      - httpApi:
+      - http:
           path: /
           method: ANY
+          cors:
+            origin: https://workuj.cz
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+            allowCredentials: false
 
-      - httpApi:
+      - http:
           path: /{proxy+}
           method: ANY
+          cors:
+            origin: https://workuj.cz
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+            allowCredentials: false
 
 plugins:
   - serverless-offline
