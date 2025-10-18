@@ -1,8 +1,31 @@
+frameworkVersion: ~4.21.1
+
+service: workuj-backend
+
 provider:
   name: aws
   runtime: nodejs18.x
   stage: ${opt:stage, 'prod'}
   region: eu-central-1
-  # Odstraňte ruční nastavení MONGODB_URI
-  # environment:
-  #   MONGODB_URI: ${env:MONGODB_URI}  <- TOHLE SMAŽTE
+
+functions:
+  app:
+    handler: lambda.handler
+    events:
+      - httpApi:
+          path: /
+          method: ANY
+      - httpApi:
+          path: /{proxy+}
+          method: ANY
+
+plugins:
+  - serverless-offline
+
+# Volitelně, pokud chcete vlastní doménu
+# custom:
+#   customDomain:
+#     domainName: api.workuj.cz
+#     certificateArn: ${ssm:/workuj/ssl-certificate-arn}
+#     hostedZoneId: ${ssm:/workuj/hosted-zone-id}
+#     createRoute53Record: true
