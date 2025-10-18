@@ -7,10 +7,11 @@ provider:
   runtime: nodejs18.x
   stage: ${opt:stage, 'prod'}
   region: eu-central-1
-  apiGateway:
-    cors:
-      origin: 'https://workuj.cz'  # Replace with your actual frontend domain
-      headers:
+  httpApi:
+    cors: 
+      allowedOrigins:
+        - https://workuj.cz
+      allowedHeaders:
         - Content-Type
         - X-Amz-Date
         - Authorization
@@ -22,16 +23,13 @@ functions:
   app:
     handler: lambda.handler
     events:
-      - http:
+      - httpApi:
           path: /
           method: ANY
-          cors: true  # Povolení CORS pro každou cestu
 
-      - http:
+      - httpApi:
           path: /{proxy+}
           method: ANY
-          cors: true  # Povolení CORS pro každou cestu
-
 
 plugins:
   - serverless-offline
