@@ -1,4 +1,4 @@
-frameworkVersion: ~4.21.1
+frameworkVersion: '3.38.0'
 
 service: workuj-backend
 
@@ -12,15 +12,17 @@ functions:
   app:
     handler: lambda.handler
     events:
-      - httpApi:
+      - http:
           path: /
           method: ANY
-      - httpApi:
+      - http:
           path: /{proxy+}
           method: ANY
 
 plugins:
   - serverless-offline
+  - serverless-domain-manager
+
 custom:
   customDomain:
     domainName: api.workuj.cz
@@ -28,10 +30,3 @@ custom:
     stage: prod
     createRoute53Record: true
     certificateArn: arn:aws:acm:us-east-1:615299768293:certificate/f0b93040-b436-4f4a-90a9-12ee9e9d2e4b
-# Volitelně, pokud chcete vlastní doménu
-# custom:
-#   customDomain:
-#     domainName: api.workuj.cz
-#     certificateArn: ${ssm:/workuj/ssl-certificate-arn}
-#     hostedZoneId: ${ssm:/workuj/hosted-zone-id}
-#     createRoute53Record: true
