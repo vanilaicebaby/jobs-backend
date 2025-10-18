@@ -1,23 +1,18 @@
-frameworkVersion: '3'
-
-service: workuj-backend
-
 provider:
-  name: aws
-  runtime: nodejs18.x
-  stage: ${opt:stage, 'prod'}
-  region: eu-central-1
+  apiGateway:
+    cors: true  # Základní povolení CORS
 
 functions:
   app:
-    handler: lambda.handler
     events:
       - http:
           path: /
           method: ANY
+          cors: true  # CORS pro každou cestu
       - http:
           path: /{proxy+}
           method: ANY
+          cors: true
 
 plugins:
   - serverless-offline

@@ -58,4 +58,10 @@ app.listen(PORT, () => {
   console.log(`Server běží na portu ${PORT}`);
 });
 
+app.use(cors({
+  origin: process.env.FRONTEND_URL || '*', // Konkrétní URL nebo wildcard
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 module.exports = app;
