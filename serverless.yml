@@ -3,43 +3,29 @@ service: workuj-backend
 provider:
   name: aws
   runtime: nodejs18.x
-  stage: prod
+  stage: ${opt:stage, 'prod'}
   region: eu-central-1
   
-  # Přidejte custom domain
-  apiGateway:
-    shouldStartNameWithService: true
-
 functions:
   app:
     handler: lambda.handler
     events:
       - http:
-          path: api/jobs
+          path: prod/api/jobs
           method: get
           cors: true
-      
       - http:
-          path: api/jobs
-          method: options
-          cors: true
-
-      # Přidejte catch-all route
-      - http:
-          path: /{proxy+}
+          path: prod/api/jobs/{proxy+}
           method: any
           cors: true
 
 plugins:
   - serverless-offline
-  - serverless-domain-manager  # Volitelně pro vlastní domain
+  - serverless-domain-manager
 
-# Volitelná konfigurace custom domény
 custom:
   customDomain:
     domainName: api.workuj.cz
-    certificateName: 'api.workuj.cz'  # Název certifikátu v ACM
-    basePath: ''
-    stage: prod
+    stage: ${self:provider.stage}
+    basePath: prod  # Toto nastaví basePath na 'prod'
     createRoute53Record: true
-    endpointType: 'regional'  # Podle konfigurace API Gateway
