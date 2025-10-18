@@ -37,7 +37,9 @@ plugins:
 # Volitelná konfigurace custom domény
 custom:
   customDomain:
-    domainName: api.workuj.cz  # Váš custom domain
+    domainName: api.workuj.cz
+    certificateName: 'api.workuj.cz'  # Název certifikátu v ACM
     basePath: ''
     stage: prod
     createRoute53Record: true
+    endpointType: 'regional'  # Podle konfigurace API Gateway
