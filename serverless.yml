@@ -21,7 +21,13 @@ functions:
 
 plugins:
   - serverless-offline
-
+custom:
+  customDomain:
+    domainName: api.workuj.cz
+    basePath: ''
+    stage: prod
+    createRoute53Record: true
+    certificateArn: arn:aws:acm:us-east-1:615299768293:certificate/f0b93040-b436-4f4a-90a9-12ee9e9d2e4b
 # Volitelně, pokud chcete vlastní doménu
 # custom:
 #   customDomain:
