@@ -30,13 +30,11 @@
     "morgan": "^1.10.1",
     "serverless-http": "^3.2.0"
   },
-  "devDependencies": {
-    "eslint": "^8.53.0",
-    "jest": "^29.7.0",
-    "nodemon": "^3.0.1",
-    "serverless-domain-manager": "^6.2.0",
-    "serverless-offline": "^12.0.4"
-  },
+"devDependencies": {
+  "serverless": "^3.x.x",
+  "serverless-offline": "^12.0.4",
+  "serverless-domain-manager": "^6.2.0"
+},
   "directories": {
     "test": "tests"
   }
