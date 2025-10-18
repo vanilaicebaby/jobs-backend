@@ -9,7 +9,7 @@ provider:
   region: eu-central-1
   apiGateway:
     cors:
-      origin: '*'  # Pro produkci omezit na konkrétní domény
+      origin: 'https://workuj.cz'  # Replace with your actual frontend domain
       headers:
         - Content-Type
         - X-Amz-Date
