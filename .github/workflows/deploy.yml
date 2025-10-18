@@ -1,0 +1,30 @@
+service: jobs-cz-backend
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: eu-central-1
+  environment:
+    MONGODB_URI: ${env:MONGODB_URI}
+    NODE_ENV: ${env:NODE_ENV, 'development'}
+
+functions:
+  app:
+    handler: server.handler
+    events:
+      - http:
+          path: /
+          method: ANY
+      - http:
+          path: /{proxy+}
+          method: ANY
+
+plugins:
+  - serverless-offline
+
+package:
+  excludeDevDependencies: false
+  exclude:
+    - node_modules/serverless/**
+    - node_modules/aws-sdk/**
