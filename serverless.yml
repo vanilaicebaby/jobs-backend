@@ -11,11 +11,11 @@ functions:
     handler: lambda.handler
     events:
       - http:
-          path: prod/api/jobs
+          path: api/jobs  # Odstraňte duplicitní /prod
           method: get
           cors: true
       - http:
-          path: prod/api/jobs/{proxy+}
+          path: api/jobs/{proxy+}
           method: any
           cors: true
 
