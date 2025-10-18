@@ -26,12 +26,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Připojení k MongoDB
-const mongoose = require('mongoose');
-
 mongoose.connect(process.env.MONGODB_URI, {
-  authMechanism: 'MONGODB-AWS-IAM',
-  // případně další specifické nastavení pro AWS IAM
+  // Odstraněno nastavení authMechanism, protože pravděpodobně není vyžadováno pro standardní připojení
 })
+.then(() => console.log('Úspěšně připojeno k MongoDB'))
+.catch((error) => console.error('Chyba při připojování k MongoDB:', error));
 
 // Definice routes
 app.use('/api/jobs', jobRoutes);
