@@ -1,7 +1,6 @@
-const AWS = require('aws-sdk');
-const dynamodb = new AWS.DynamoDB.DocumentClient({
-  region: 'eu-central-1' // Vaše AWS region
-});
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { ScanCommand, GetItemCommand } = require('@aws-sdk/client-dynamodb');
+const { unmarshall } = require('@aws-sdk/util-dynamodb');
 
 class JobModel {
   static client = new DynamoDBClient({ region: 'eu-central-1' });
@@ -42,9 +41,9 @@ class JobModel {
     const command = new GetItemCommand({
       TableName: 'Jobs',
       Key: { 
-        'id': id  // Ujistěte se, že máte správný partition key
+        'id': { S: id }  // Správný formát klíče pro DynamoDB
       }
-    };
+    });
 
     try {
       const { Item } = await this.client.send(command);
