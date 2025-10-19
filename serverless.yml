@@ -1,11 +1,18 @@
-service: workuj-backend
-
 provider:
   name: aws
   runtime: nodejs18.x
   stage: ${opt:stage, 'prod'}
   region: eu-central-1
   
+  # Přidejte IAM role pro přístup k DynamoDB
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/Jobs"
+
 functions:
   app:
     handler: lambda.handler
@@ -18,14 +25,3 @@ functions:
           path: api/jobs/{proxy+}
           method: any
           cors: true
-
-plugins:
-  - serverless-offline
-  - serverless-domain-manager
-
-custom:
-  customDomain:
-    domainName: api.workuj.cz
-    basePath: ''  # Prázdný basePath
-    stage: prod
-    createRoute53Record: true
