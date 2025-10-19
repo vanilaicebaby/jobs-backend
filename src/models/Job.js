@@ -1,15 +1,13 @@
 const AWS = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB.DocumentClient({
-  region: 'eu-central-1' // Vaše AWS region
+  region: 'eu-central-1'
 });
 
 class JobModel {
   static async findAll(params = {}) {
     const { 
       page = 1, 
-      limit = 10, 
-      search = '', 
-      industry 
+      limit = 10 
     } = params;
 
     const scanParams = {
@@ -20,7 +18,6 @@ class JobModel {
     try {
       const result = await dynamodb.scan(scanParams).promise();
       
-      // Manuální stránkování
       const startIndex = (page - 1) * limit;
       const paginatedJobs = result.Items.slice(startIndex, startIndex + limit);
 
@@ -39,9 +36,7 @@ class JobModel {
   static async findById(id) {
     const params = {
       TableName: 'Jobs',
-      Key: { 
-        'id': id  // Ujistěte se, že máte správný partition key
-      }
+      Key: { 'id': id }
     };
 
     try {
