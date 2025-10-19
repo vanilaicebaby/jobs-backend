@@ -26,13 +26,20 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: eu-central-1
     
-    - name: Install Serverless
+    - name: Prepare Lambda Package
       run: |
-        npm install -g serverless
-        # Místo přihlašování použijeme proměnné prostředí
-        echo "SERVERLESS_ACCESS_KEY=${{ secrets.SERVERLESS_ACCESS_KEY }}" >> $GITHUB_ENV
+        mkdir -p deployment
+        cp -r node_modules deployment/
+        cp -r src deployment/
+        cp lambda.js deployment/
+        cp package.json deployment/
+        cd deployment
+        npm prune --production
+        zip -r ../lambda-deployment.zip .
     
     - name: Deploy to AWS Lambda
-      run: serverless deploy --stage prod
-      env:
-        SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+      run: |
+        aws lambda update-function-code \
+          --function-name workuj-backend-prod-app \
+          --zip-file fileb://lambda-deployment.zip \
+          --region eu-central-1

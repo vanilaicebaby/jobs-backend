@@ -1,33 +1,37 @@
-const AWS = require('aws-sdk');
-const dynamodb = new AWS.DynamoDB.DocumentClient({
-  region: 'eu-central-1' // Vaše AWS region
-});
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { 
+  ScanCommand, 
+  GetItemCommand 
+} = require('@aws-sdk/client-dynamodb');
+const { unmarshall } = require('@aws-sdk/util-dynamodb');
 
 class JobModel {
+  static client = new DynamoDBClient({ region: 'eu-central-1' });
+
   static async findAll(params = {}) {
     const { 
       page = 1, 
-      limit = 10, 
-      search = '', 
-      industry 
+      limit = 10 
     } = params;
 
-    const scanParams = {
+    const command = new ScanCommand({
       TableName: 'Jobs',
       Limit: Number(limit)
-    };
+    });
 
     try {
-      const result = await dynamodb.scan(scanParams).promise();
+      const { Items } = await this.client.send(command);
       
-      // Manuální stránkování
+      // Transformace DynamoDB items
+      const jobs = Items ? Items.map(item => unmarshall(item)) : [];
+      
       const startIndex = (page - 1) * limit;
-      const paginatedJobs = result.Items.slice(startIndex, startIndex + limit);
+      const paginatedJobs = jobs.slice(startIndex, startIndex + limit);
 
       return {
         jobs: paginatedJobs,
-        totalJobs: result.Items.length,
-        totalPages: Math.ceil(result.Items.length / limit),
+        totalJobs: jobs.length,
+        totalPages: Math.ceil(jobs.length / limit),
         currentPage: Number(page)
       };
     } catch (error) {
@@ -37,16 +41,16 @@ class JobModel {
   }
 
   static async findById(id) {
-    const params = {
+    const command = new GetItemCommand({
       TableName: 'Jobs',
-      Key: { 
-        'id': id  // Ujistěte se, že máte správný partition key
+      Key: {
+        'id': { S: id }
       }
-    };
+    });
 
     try {
-      const result = await dynamodb.get(params).promise();
-      return result.Item;
+      const { Item } = await this.client.send(command);
+      return Item ? unmarshall(Item) : null;
     } catch (error) {
       console.error('Chyba při načítání jobu', error);
       throw error;
