@@ -1,68 +1,81 @@
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { ScanCommand, GetItemCommand } = require('@aws-sdk/client-dynamodb');
+const { unmarshall } = require('@aws-sdk/util-dynamodb');
 
-// Odstraňte mongoose připojení
-dotenv.config();
-
-// Importy routes
-const jobRoutes = require('./src/routes/jobRoutes');
-const rootRoutes = require('./src/routes/rootRoutes');
-
-// Vytvoření Express aplikace
 const app = express();
+const PORT = process.env.PORT || 5000;
 
-// CORS konfigurace
-const corsOptions = {
-  origin: function (origin, callback) {
-    const whitelist = [
-      'https://workuj.cz', 
-      'http://workuj.cz', 
-      'http://localhost:3000', 
-      'https://localhost:3000'
-    ];
-
-    if (!origin || whitelist.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type', 
-    'Authorization', 
-    'X-Requested-With'
-  ],
-  credentials: true
-};
+// DynamoDB klient
+const dynamoClient = new DynamoDBClient({ region: 'eu-central-1' });
 
 // Middleware
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use('/', rootRoutes);
-app.use('/api/jobs', jobRoutes);
+// Route pro všechny joby
+app.get('/api/jobs', async (req, res) => {
+  try {
+    const command = new ScanCommand({
+      TableName: 'Jobs',
+      Limit: 50
+    });
 
-// Globální error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    status: 'error',
-    message: process.env.NODE_ENV === 'production' 
-      ? 'Něco se pokazilo' 
-      : err.message
+    const { Items } = await dynamoClient.send(command);
+    
+    const jobs = Items 
+      ? Items.map(item => unmarshall(item)) 
+      : [];
+
+    res.json({
+      jobs,
+      totalJobs: jobs.length
+    });
+  } catch (error) {
+    console.error('Chyba při načítání jobů', error);
+    res.status(500).json({ 
+      message: 'Chyba při načítání pracovních nabídek', 
+      error: error.message 
+    });
+  }
+});
+
+// Route pro jeden job
+app.get('/api/jobs/:id', async (req, res) => {
+  try {
+    const command = new GetItemCommand({
+      TableName: 'Jobs',
+      Key: { 
+        'id': { S: req.params.id } 
+      }
+    });
+
+    const { Item } = await dynamoClient.send(command);
+    
+    if (!Item) {
+      return res.status(404).json({ message: 'Job nenalezen' });
+    }
+
+    res.json(unmarshall(Item));
+  } catch (error) {
+    console.error('Chyba při načítání jobu', error);
+    res.status(500).json({ 
+      message: 'Chyba při načítání detailu jobu', 
+      error: error.message 
+    });
+  }
+});
+
+// Zdravotní test
+app.get('/', (req, res) => {
+  res.json({
+    status: 'OK',
+    message: 'API je v provozu'
   });
 });
 
-// 404 handler
-app.use((req, res, next) => {
-  res.status(404).json({
-    status: 'error',
-    message: 'Endpoint nenalezen'
-  });
+// Spuštění serveru
+app.listen(PORT, () => {
+  console.log(`Server běží na portu ${PORT}`);
 });
-
-module.exports = app;
