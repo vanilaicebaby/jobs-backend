@@ -4,16 +4,12 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "deploy": "zip -r deployment.zip ."
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.470.0",
     "@aws-sdk/util-dynamodb": "^3.470.0",
     "cors": "^2.8.5",
-    "express": "^4.21.2",
-    "dotenv": "^16.6.1"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
+    "express": "^4.21.2"
   }
 }
